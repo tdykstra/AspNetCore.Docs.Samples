@@ -90,8 +90,29 @@ app.MapPost("/todos", async ([FromForm] string name, [FromForm] Visibility visib
 
 // </snippet_post_put_delete>
 
+string GetOrCreateFilePath(string fileName, string filesDirectory = "uploadFiles")
+{
+    var directoryPath = Path.Combine(app.Environment.ContentRootPath, filesDirectory);
+    Directory.CreateDirectory(directoryPath);
+    return Path.Combine(directoryPath, fileName);
+}
+
+async Task UploadFileWithName(IFormFile file, string fileSaveName)
+{
+    var filePath = GetOrCreateFilePath(fileSaveName);
+    await using var fileStream = new FileStream(filePath, FileMode.Create);
+    await file.CopyToAsync(fileStream);
+}
+
+app.MapPost("/upload/todos", async ([FromForm] string name, [FromForm] Visibility visibility, IFormFile? attachment, TodoDb db) => {
+    var fileSaveName = Guid.NewGuid().ToString("N") + Path.GetExtension(attachment!.FileName);
+    await UploadFileWithName(attachment, fileSaveName);
+    return TypedResults.Ok("File uploaded successfully!");
+});
+
 app.UseStaticFiles();
 app.Run();
+
 
 // <snippet_argumentlist_record>
 public record struct NewTodoRequest([FromForm] string Name, [FromForm] Visibility Visibility, IFormFile? Attachment);
