@@ -3,6 +3,7 @@ namespace WebApiSample.Controllers;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using WebApiSample.Models;
+//using WebApiSample.Controllers;
 
 [ApiController]
 [Route("products/actionresultoft")]
@@ -41,7 +42,20 @@ public class ActionResultOfTProductsController : ControllerBase
         _productContext.Products.Add(product);
         await _productContext.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(CreateAsync_ActionResultOfT), new { id = product.Id }, product);
+        return CreatedAtAction(nameof(GetByIdAsync), new { id = product.Id }, product);
     }
     // </snippet_CreateAsyncActionResultOfT>
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<Product>> GetByIdAsync(int id)
+    {
+        var product = await _productContext.Products.FindAsync(id);
+
+        if (product == null)
+        {
+            return NotFound();
+        }
+
+        return product;
+    }
 }

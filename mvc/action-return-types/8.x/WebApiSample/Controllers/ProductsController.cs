@@ -15,6 +15,19 @@ public partial class ProductsController : ControllerBase
         _productContext = productContext;
     }
 
+    [HttpGet("{id}")]
+    public async Task<ActionResult<Product>> GetByIdAsync(int id)
+    {
+        var product = await _productContext.Products.FindAsync(id);
+
+        if (product == null)
+        {
+            return NotFound();
+        }
+
+        return product;
+    }
+
     // <snippet_Get>
     [HttpGet]
     public Task<List<Product>> Get() =>
